@@ -1,9 +1,11 @@
 import time
 import argparse
+from sklearn.tree import DecisionTreeClassifier
 
 from src.data_provider import DataProvider
-from src.data_collector import DataCollector, data_to_xy
+from src.data_collector import data_to_xy
 from src.EDA_and_preprocessing import process
+from src.model import Model
 
 TARGET = 'WITH_PAID'
 
@@ -20,13 +22,14 @@ def main():
     raw_data_path = args.dataset
     data_provider = DataProvider(raw_data_path)
 
-    data_collector = DataCollector()
+    model = Model(DecisionTreeClassifier())
+
     while True:
         data = data_provider.get_batch()
         data, stat = process(data)
         x, y = data_to_xy(data, TARGET)
-        data_collector.add(x, y)
-        print(data_collector.x)
+        print(model.eval())
+        model.fit(x, y)
         time.sleep(3)
 
 
