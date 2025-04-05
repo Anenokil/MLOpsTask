@@ -2,6 +2,7 @@ import os
 import time
 import argparse
 import logging
+import yaml
 from sklearn.tree import DecisionTreeClassifier
 
 from src.data_provider import DataProvider
@@ -15,9 +16,22 @@ TIME_STAMP = 'INSR_BEGIN'
 
 def get_args():
     parser = argparse.ArgumentParser()
+    parser.add_argument('--config', help='Path to YAML config')
     parser.add_argument('--dataset', help='Path to CSV file with dataset')
     parser.add_argument('--log_dir', help='Path to folder with logs')
     return parser.parse_args()
+
+
+def read_config(args: argparse.Namespace):
+    fn = args.config
+    if not fn:
+        return
+
+    with open(fn, 'r') as f:
+        config = yaml.safe_load(f)
+    for k, v in config.items():
+        if k in args.__dict__ and args.__dict__[k] is None:
+            args.__dict__[k] = v
 
 
 def init_logger(log_dir: str):
@@ -43,6 +57,9 @@ def log_data_quality(data_quality: dict[str, ...]):
 
 def main():
     args = get_args()
+    read_config(args)
+    # for k, v in args.__dict__.items():
+    #     print(f'{k} = {v}')
 
     init_logger(args.log_dir)
 
