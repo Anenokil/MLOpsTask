@@ -2,7 +2,9 @@ import time
 import argparse
 
 from src.data_provider import DataProvider
-from src.data_collector import DataCollector
+from src.data_collector import DataCollector, data_to_xy
+
+TARGET = 'WITH_PAID'
 
 
 def get_args():
@@ -19,10 +21,11 @@ def main():
 
     data_collector = DataCollector()
     while True:
-        x, y = data_provider.get_day_data()
+        data = data_provider.get_batch()
+        x, y = data_to_xy(data, TARGET)
         data_collector.add(x, y)
         print(data_collector.x)
-        time.sleep(2)
+        time.sleep(3)
 
 
 main()

@@ -25,3 +25,9 @@ class DataCollector:
         else:
             self.x = pd.concat([self.x, x], axis=0)
             self.y = pd.concat([self.y, y], axis=0)
+
+
+def data_to_xy(data: pd.DataFrame, target: str) -> tuple[pd.DataFrame, pd.DataFrame]:
+    x = data.drop(target, axis=1)
+    y = data[target]
+    return x, y
