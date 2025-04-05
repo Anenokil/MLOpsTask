@@ -2,12 +2,15 @@ import pandas as pd
 
 
 class DataCollector:
-    def __init__(self):
+    def __init__(self, x: pd.DataFrame = None, y: pd.DataFrame = None):
         """
         DataCollector aggregates received data
+
+        :param x: x
+        :param y: y
         """
-        self.x: pd.DataFrame | None = None
-        self.y: pd.DataFrame | None = None
+        self.x = x
+        self.y = y
 
     def add(self, x: pd.DataFrame, y: pd.DataFrame):
         """
