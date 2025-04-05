@@ -9,8 +9,13 @@ def process_na(df: pd.DataFrame) -> dict[str, ...]:
     :param df: data
     :return: dict with keys: 'result' - processed data, 'stat': percentage of missed values
     """
-    stat = df.isna().sum(axis=0) / df.shape[0]
+    na_by_col = df.isna().sum(axis=0) / df.shape[0]
+    na_by_row = df.isna().sum(axis=1)
+    rows_with_na = na_by_row[na_by_row != 0].shape[0] / df.shape[0]
+    stat = {'na_by_col': na_by_col, 'rows_with_na': rows_with_na}
+
     res = df.dropna()
+
     return {'result': res, 'stat': stat}
 
 

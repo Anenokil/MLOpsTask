@@ -28,6 +28,8 @@ def main():
     while True:
         data = data_provider.get_batch()
         data, stat = process(data)
+        data_quality = stat['na']
+        print(data_quality)
         x, y = data_to_xy(data, TARGET)
         print(model.eval())
         model.fit(x, y)
