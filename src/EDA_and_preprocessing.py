@@ -27,13 +27,13 @@ def process_ctg(df: pd.DataFrame) -> dict[str, ...]:
     :return: dict with keys: 'result' - processed data, 'stat': names of categorical features
     """
     ohe = OneHotEncoder()
-    categorical = df.dtypes[df.dtypes == 'object'].index.tolist()
-    noncategorical = df.drop(categorical, axis=1)
-    encoded = ohe.fit_transform(df[categorical])
-    encoded = pd.DataFrame(encoded.toarray(), columns=ohe.get_feature_names_out(),
-                           dtype=int, index=noncategorical.index)
-    res = pd.concat([noncategorical, encoded], axis=1)
-    return {'result': res, 'stat': categorical}
+    categorical_cols = df.dtypes[df.dtypes == 'object'].index.tolist()
+    noncategorical = df.drop(categorical_cols, axis=1)
+    encoded_ctg = ohe.fit_transform(df[categorical_cols])
+    encoded_ctg = pd.DataFrame(encoded_ctg.toarray(), columns=ohe.get_feature_names_out(),
+                               dtype=int, index=noncategorical.index)
+    res = pd.concat([noncategorical, encoded_ctg], axis=1)
+    return {'result': res, 'stat': categorical_cols}
 
 
 def process(df: pd.DataFrame) -> tuple[pd.DataFrame, dict[str, ...]]:
