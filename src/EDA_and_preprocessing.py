@@ -12,16 +12,19 @@ class DataTransformer:
             'drop' for remove lines with missing values;
             'median-mode' for replace them with median (for numeric) or mode (for categorical)
         :param ctg_method: how to process categorical features:
+            'drop' for remove categorical columns;
             'ohe' for one-hot encoding
         """
         assert na_method in ['drop', 'median-mode']
-        assert ctg_method in ['ohe']
+        assert ctg_method in ['drop', 'ohe']
 
         self.na_method = na_method
         self.ctg_method = ctg_method
 
         self.data = None
         self.stat = {}
+
+        self.categories = []
 
     def __process_na(self):
         """
@@ -53,10 +56,21 @@ class DataTransformer:
         self.stat['ctg'] = categorical_cols
 
         # Process categorical features
-        if self.ctg_method == 'ohe':
+        if self.ctg_method == 'drop':
+            self.data = self.data.drop(columns=categorical_cols)
+        elif self.ctg_method == 'ohe':  # TODO
+            # Update categories list
             ohe = OneHotEncoder()
-            noncategorical = self.data.drop(categorical_cols, axis=1)
+            ohe.fit(self.data[categorical_cols])
+            if not self.categories:
+                self.categories = ohe.categories_
+            else:
+                self.categories = [list(set(list(a) + list(b))) for a, b in zip(self.categories, ohe.categories_)]
+            # Apply OHE
+            ohe = OneHotEncoder(categories=self.categories)
             encoded_ctg = ohe.fit_transform(self.data[categorical_cols])
+            # Concatenate non-categorical and encoded categorical features
+            noncategorical = self.data.drop(categorical_cols, axis=1)
             encoded_ctg = pd.DataFrame(encoded_ctg.toarray(), columns=ohe.get_feature_names_out(),
                                        dtype=int, index=noncategorical.index)
             self.data = pd.concat([noncategorical, encoded_ctg], axis=1)

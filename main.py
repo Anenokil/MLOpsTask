@@ -70,7 +70,7 @@ def main():
     data_provider = DataProvider(raw_data_path, TIME_STAMP)
 
     # Initialize data transformer
-    data_processor = DataTransformer(na_method='median-mode')
+    data_processor = DataTransformer(na_method='median-mode', ctg_method='drop')
 
     # Initialize ML model
     model = Model(DecisionTreeClassifier())
