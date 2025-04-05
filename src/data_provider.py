@@ -15,9 +15,9 @@ class DataProvider:
         self.data = pd.read_csv(path_to_raw_data)
         self.i = 0
 
-    def get_day_data(self):
+    def get_day_data(self) -> tuple[pd.DataFrame, pd.DataFrame]:
         """
-        Generate one day data
+        Generate one-day data
 
         :return: data (x, y)
         """
@@ -29,7 +29,7 @@ class DataProvider:
         y = day_data[self.target]
         return x, y
 
-    def get_data(self, batch_size=50):
+    def get_batch(self, batch_size=50) -> tuple[pd.DataFrame, pd.DataFrame]:
         """
         Generate fixed amount of data
 
