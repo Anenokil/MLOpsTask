@@ -1,3 +1,4 @@
+import typing
 import os
 import time
 import argparse
@@ -10,8 +11,8 @@ from src.data_collector import data_to_xy
 from src.EDA_and_preprocessing import process
 from src.model import Model
 
-TARGET = 'WITH_PAID'
-TIME_STAMP = 'INSR_BEGIN'
+TARGET = 'WITH_PAID'  # Target column in data
+TIME_STAMP = 'INSR_BEGIN'  # Column with time stamps
 
 
 def get_args():
@@ -48,7 +49,7 @@ def init_logger(log_dir: str):
     logging.basicConfig(filename=log_fn, level=logging.INFO, format='%(asctime)s - %(message)s')
 
 
-def log_data_quality(data_quality: dict[str, ...]):
+def log_data_quality(data_quality: dict[str, typing.Any]):
     na_by_col = data_quality['na_by_col'].tolist()
     rows_with_na = data_quality['rows_with_na']
     logging.info(f'na_by_col: {na_by_col}')
@@ -56,30 +57,38 @@ def log_data_quality(data_quality: dict[str, ...]):
 
 
 def main():
+    # Get args from console
     args = get_args()
+    # Read args from config
     read_config(args)
-    # for k, v in args.__dict__.items():
-    #     print(f'{k} = {v}')
 
+    # Initialize logger
     init_logger(args.log_dir)
 
+    # Initialize data provider
     raw_data_path = args.dataset
     data_provider = DataProvider(raw_data_path, TIME_STAMP)
 
+    # Initialize ML model
     model = Model(DecisionTreeClassifier())
 
     while True:
+        # Get data batch
         data = data_provider.get_batch()
         if data.empty:
             break
         logging.info(f'Get {data.shape[0]} samples')
+        # Analyze and preprocess data
         processed_data, stat = process(data)
         log_data_quality(stat['na'])
         logging.info(f'Keep {processed_data.shape[0]} samples')
         x, y = data_to_xy(processed_data, TARGET)
+        # Evaluate model
         if model.is_fit():
             print(model.eval())
+        # Train model
         model.fit(x, y)
+        # Emulate delay between data arrivals
         time.sleep(3)
 
 
