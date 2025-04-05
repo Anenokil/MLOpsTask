@@ -70,11 +70,13 @@ def main():
 
     while True:
         data = data_provider.get_batch()
+        if data.empty:
+            break
         logging.info(f'Get {data.shape[0]} samples')
-        data, stat = process(data)
+        processed_data, stat = process(data)
         log_data_quality(stat['na'])
-        logging.info(f'Keep {data.shape[0]} samples')
-        x, y = data_to_xy(data, TARGET)
+        logging.info(f'Keep {processed_data.shape[0]} samples')
+        x, y = data_to_xy(processed_data, TARGET)
         if model.is_fit():
             print(model.eval())
         model.fit(x, y)
