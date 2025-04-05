@@ -34,6 +34,13 @@ def init_logger(log_dir: str):
     logging.basicConfig(filename=log_fn, level=logging.INFO, format='%(asctime)s - %(message)s')
 
 
+def log_data_quality(data_quality: dict[str, ...]):
+    na_by_col = data_quality['na_by_col'].tolist()
+    rows_with_na = data_quality['rows_with_na']
+    logging.info(f'na_by_col: {na_by_col}')
+    logging.info(f'rows_with_na: {100 * rows_with_na}%')
+
+
 def main():
     args = get_args()
 
@@ -48,6 +55,7 @@ def main():
         data = data_provider.get_batch()
         logging.info(f'Get {data.shape[0]} samples')
         data, stat = process(data)
+        log_data_quality(stat['na'])
         logging.info(f'Keep {data.shape[0]} samples')
         x, y = data_to_xy(data, TARGET)
         print(model.eval())
