@@ -88,7 +88,7 @@ def main():
         x, y = data_to_xy(processed_data, TARGET)
         # Evaluate model
         if model.is_fit():
-            print(model.eval())
+            print(model.eval(x, y))
         # Train model
         model.fit(x, y)
         # Emulate delay between data arrivals

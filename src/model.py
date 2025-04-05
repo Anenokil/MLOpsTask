@@ -14,10 +14,7 @@ class Model:
     def predict(self, x: pd.DataFrame):
         return self.model.predict(x)
 
-    def eval(self):
-        x, y = self.data.get()
-        if x is None:
-            return None
+    def eval(self, x: pd.DataFrame, y: pd.DataFrame):
         return self.model.score(x, y)
 
     def is_fit(self):
