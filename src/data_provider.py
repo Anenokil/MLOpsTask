@@ -2,7 +2,7 @@ import pandas as pd
 
 
 class DataProvider:
-    def __init__(self, path_to_raw_data: str, time_stamp='INSR_BEGIN'):
+    def __init__(self, path_to_raw_data: str, time_stamp: str):
         """
         DataProvider emulates a streaming data source
 

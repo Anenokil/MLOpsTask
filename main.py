@@ -8,6 +8,7 @@ from src.EDA_and_preprocessing import process
 from src.model import Model
 
 TARGET = 'WITH_PAID'
+TIME_STAMP = 'INSR_BEGIN'
 
 
 def get_args():
@@ -20,7 +21,7 @@ def main():
     args = get_args()
 
     raw_data_path = args.dataset
-    data_provider = DataProvider(raw_data_path)
+    data_provider = DataProvider(raw_data_path, TIME_STAMP)
 
     model = Model(DecisionTreeClassifier())
 
