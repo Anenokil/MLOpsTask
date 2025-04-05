@@ -19,3 +19,6 @@ class Model:
         if x is None:
             return None
         return self.model.score(x, y)
+
+    def is_fit(self):
+        return self.data.x is not None

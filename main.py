@@ -75,7 +75,8 @@ def main():
         log_data_quality(stat['na'])
         logging.info(f'Keep {data.shape[0]} samples')
         x, y = data_to_xy(data, TARGET)
-        print(model.eval())
+        if model.is_fit():
+            print(model.eval())
         model.fit(x, y)
         time.sleep(3)
 
