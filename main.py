@@ -3,6 +3,7 @@ import argparse
 
 from src.data_provider import DataProvider
 from src.data_collector import DataCollector, data_to_xy
+from src.EDA import process_na
 
 TARGET = 'WITH_PAID'
 
@@ -22,6 +23,7 @@ def main():
     data_collector = DataCollector()
     while True:
         data = data_provider.get_batch()
+        data = process_na(data)['result']
         x, y = data_to_xy(data, TARGET)
         data_collector.add(x, y)
         print(data_collector.x)
