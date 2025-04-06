@@ -8,7 +8,7 @@ from sklearn.tree import DecisionTreeClassifier
 
 from src.data_provider import DataProvider
 from src.data_collector import data_to_xy
-from src.EDA_and_preprocessing import DataTransformer
+from src.EDA_and_preprocessing import DataAnalyzer, DataTransformer
 from src.model import Model
 
 TARGET = 'WITH_PAID'  # Target column in data
@@ -70,6 +70,9 @@ def main():
     raw_data_path = args.dataset
     data_provider = DataProvider(raw_data_path, TIME_STAMP)
 
+    # Initialize data analyzer
+    data_analyzer = DataAnalyzer()
+
     # Initialize data transformer
     data_processor = DataTransformer(na_method='median-mode', ctg_method='drop')
 
@@ -86,9 +89,11 @@ def main():
         if args.verbose:
             print('Receive new data')
         logging.info(f'Get {data.shape[0]} samples')
-        # Analyze and preprocess data
-        processed_data, stat = data_processor.process(data)
+        # Analyze data
+        stat = data_analyzer.analyze(data)
         log_data_quality(stat['na'])
+        # Preprocess data
+        processed_data = data_processor.process(data)
         logging.info(f'Keep {processed_data.shape[0]} samples')
         x, y = data_to_xy(processed_data, TARGET)
         # Evaluate model

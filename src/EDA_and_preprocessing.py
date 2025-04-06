@@ -3,10 +3,43 @@ import pandas as pd
 from sklearn.preprocessing import OneHotEncoder
 
 
+class DataAnalyzer:
+    def __init__(self):
+        """
+        DataAnalyzer analyzes data
+        """
+        self.data = None
+        self.stat = {}
+
+    def __analyze_na(self):
+        """
+        Collect statistics on missing values
+        """
+        na_by_col = self.data.isna().sum(axis=0) / self.data.shape[0]
+        na_by_row = self.data.isna().sum(axis=1)
+        rows_with_na = na_by_row[na_by_row != 0].shape[0] / self.data.shape[0]
+        self.stat['na'] = {'na_by_col': na_by_col, 'rows_with_na': rows_with_na}
+
+    def analyze(self, df: pd.DataFrame) -> dict[str, typing.Any]:
+        """
+        Analyze data
+
+        :param df: data
+        :return: dict with information about data. Dict contains 'na' and 'ctg' keys
+        """
+        self.data = df.copy()
+        self.stat = {}
+
+        # Analyze missing values
+        self.__analyze_na()
+
+        return self.stat
+
+
 class DataTransformer:
     def __init__(self, na_method='drop', ctg_method='ohe'):
         """
-        DataProcessor analyzes and processes data
+        DataTransformer processes data
 
         :param na_method: how to process missing values:
             'drop' for remove lines with missing values;
@@ -22,21 +55,11 @@ class DataTransformer:
         self.ctg_method = ctg_method
 
         self.data = None
-        self.stat = {}
-
-        self.categories = []
 
     def __process_na(self):
         """
         Process missing values
         """
-        # Collect statistics on missing values
-        na_by_col = self.data.isna().sum(axis=0) / self.data.shape[0]
-        na_by_row = self.data.isna().sum(axis=1)
-        rows_with_na = na_by_row[na_by_row != 0].shape[0] / self.data.shape[0]
-        self.stat['na'] = {'na_by_col': na_by_col, 'rows_with_na': rows_with_na}
-
-        # Process missing values
         if self.na_method == 'drop':
             self.data = self.data.dropna()
         elif self.na_method == 'median-mode':
@@ -51,23 +74,12 @@ class DataTransformer:
         """
         Process categorical features
         """
-        # Collect statistics on categorical features
         categorical_cols = self.data.dtypes[self.data.dtypes == 'object'].index.tolist()
-        self.stat['ctg'] = categorical_cols
-
-        # Process categorical features
         if self.ctg_method == 'drop':
             self.data = self.data.drop(columns=categorical_cols)
         elif self.ctg_method == 'ohe':  # TODO
             # Update categories list
             ohe = OneHotEncoder()
-            ohe.fit(self.data[categorical_cols])
-            if not self.categories:
-                self.categories = ohe.categories_
-            else:
-                self.categories = [list(set(list(a) + list(b))) for a, b in zip(self.categories, ohe.categories_)]
-            # Apply OHE
-            ohe = OneHotEncoder(categories=self.categories)
             encoded_ctg = ohe.fit_transform(self.data[categorical_cols])
             # Concatenate non-categorical and encoded categorical features
             noncategorical = self.data.drop(categorical_cols, axis=1)
@@ -75,20 +87,18 @@ class DataTransformer:
                                        dtype=int, index=noncategorical.index)
             self.data = pd.concat([noncategorical, encoded_ctg], axis=1)
 
-    def process(self, df: pd.DataFrame) -> tuple[pd.DataFrame, dict[str, typing.Any]]:
+    def process(self, df: pd.DataFrame) -> pd.DataFrame:
         """
         Process data
 
         :param df: data
-        :return: processed data and dict with information about data.
-            Dict contains 'na', 'ctg' keys
+        :return: processed data
         """
         self.data = df.copy()
-        self.stat = {}
 
         # Process missing values
         self.__process_na()
         # Process categorical features
         self.__process_ctg()
 
-        return self.data, self.stat
+        return self.data
