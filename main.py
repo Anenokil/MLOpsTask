@@ -17,9 +17,10 @@ TIME_STAMP = 'INSR_BEGIN'  # Column with time stamps
 
 def get_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--config', help='Path to YAML config')
-    parser.add_argument('--dataset', help='Path to CSV file with dataset')
-    parser.add_argument('--log_dir', help='Path to folder with logs')
+    parser.add_argument('-c', '--config', help='Path to YAML config')
+    parser.add_argument('-d', '--dataset', help='Path to CSV file with dataset')
+    parser.add_argument('-l', '--log_dir', help='Path to folder with logs')
+    parser.add_argument('-v', '--verbose', help='Increase output verbosity', action='store_true', required=False)
     return parser.parse_args()
 
 
@@ -75,11 +76,15 @@ def main():
     # Initialize ML model
     model = Model(DecisionTreeClassifier())
 
+    if args.verbose:
+        print('Start')
     while True:
         # Get data batch
         data = data_provider.get_batch()
         if data.empty:
             break
+        if args.verbose:
+            print('Receive new data')
         logging.info(f'Get {data.shape[0]} samples')
         # Analyze and preprocess data
         processed_data, stat = data_processor.process(data)
@@ -88,11 +93,17 @@ def main():
         x, y = data_to_xy(processed_data, TARGET)
         # Evaluate model
         if model.is_fit():
+            if args.verbose:
+                print('Evaluate model')
             print(model.eval(x, y))
         # Train model
+        if args.verbose:
+            print('Train model')
         model.fit(x, y)
         # Emulate delay between data arrivals
         time.sleep(3)
+    if args.verbose:
+        print('End')
 
 
 main()
