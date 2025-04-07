@@ -17,7 +17,7 @@ from src.model import ModelPipeline
 # warnings.filterwarnings('ignore')
 
 TARGET = 'WITH_PAID'  # Target column in data
-TIME_STAMP = 'INSR_BEGIN'  # Column with time stamps
+TIMESTAMPS = 'INSR_BEGIN'  # Column with timestamps
 PATH_TO_DATA_PROVIDER_SAVES = os.path.join('.states', 'dp.pkl')  # Path to file with DataProvider saved state
 PATH_TO_MODEL_PIPELINE_SAVES = os.path.join('.states', 'mp.pkl')  # Path to file with ModelPipeline saved state
 PAUSE = 3  # Pause (in seconds) between data arrivals
@@ -68,7 +68,7 @@ def log_data_quality(data_quality: dict[str, typing.Any]):
 
 
 # Initialize data transformer
-data_transformer = DataTransformer(TIME_STAMP, na_method='median-mode', ctg_method='ohe')
+data_transformer = DataTransformer(TIMESTAMPS, na_method='median-mode', ctg_method='ohe')
 # Initialize ML model
 model = RandomForestClassifier()
 # Initialize parameters grid
@@ -88,7 +88,7 @@ def train(args: argparse.Namespace):
 
     # Initialize data provider
     raw_data_path = args.data
-    data_provider = DataProvider(raw_data_path, TIME_STAMP, PATH_TO_DATA_PROVIDER_SAVES)
+    data_provider = DataProvider(raw_data_path, TIMESTAMPS, PATH_TO_DATA_PROVIDER_SAVES)
 
     # Initialize data analyzer
     data_analyzer = DataAnalyzer()
@@ -138,16 +138,16 @@ def inference(args: argparse.Namespace):
 
     if args.verbose:
         print('Inference starts')
-
-    # Predict
-    x, y = pipeline.predict(x)
-
+    if pipeline.is_fit():
+        # Predict
+        x, y = pipeline.predict(x)
+        # Save predictions
+        xy = xy_to_data(x, y)
+        xy.to_csv(args.out)
+    else:
+        print('Model is not fitted')
     if args.verbose:
         print('Inference ends')
-
-    # Save predictions
-    xy = xy_to_data(x, y)
-    xy.to_csv(args.out)
 
 
 def main():
