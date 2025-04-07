@@ -14,6 +14,7 @@ from src.model import ModelPipeline
 
 TARGET = 'WITH_PAID'  # Target column in data
 TIME_STAMP = 'INSR_BEGIN'  # Column with time stamps
+PAUSE = 3  # Pause (in seconds) between data arrivals
 
 
 def get_args():
@@ -99,16 +100,19 @@ def main():
         x, y = data_to_xy(data, TARGET)
         # Evaluate model
         if pipeline.is_fit():
+            logging.info('Evaluate model')
             if args.verbose:
                 print('Evaluate model')
-            print(pipeline.eval(x, y))
+            score = pipeline.eval(x, y)
+            print(f'Score: {score}')
+            logging.info(f'Score: {score}')
         # Train model
         if args.verbose:
             print('Train model')
         pipeline.fit(x, y)
 
         # Emulate delay between data arrivals
-        time.sleep(3)
+        time.sleep(PAUSE)
     if args.verbose:
         print('End')
 
