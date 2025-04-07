@@ -4,9 +4,10 @@ import time
 import argparse
 import logging
 import yaml
+import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
 
-from src.utils import data_to_xy
+from src.utils import data_to_xy, xy_to_data
 from src.data_provider import DataProvider
 from src.data_analyzer import DataAnalyzer
 from src.data_transformer import DataTransformer
@@ -25,8 +26,9 @@ PAUSE = 3  # Pause (in seconds) between data arrivals
 def get_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('-c', '--config', help='Path to YAML config')
-    parser.add_argument('-d', '--dataset', help='Path to CSV file with dataset')
-    parser.add_argument('-l', '--log_dir', help='Path to folder with logs')
+    parser.add_argument('-d', '--data', help='Path to CSV file with dataset')
+    parser.add_argument('-o', '--out', help='Output path for inference')
+    parser.add_argument('-l', '--logs', help='Path to folder with logs')
     parser.add_argument('-m', '--mode', choices=['train', 'update', 'inference', 'summary'], help='Action type')
     parser.add_argument('-v', '--verbose', help='Increase output verbosity', action='store_true')
     return parser.parse_args()
@@ -65,30 +67,35 @@ def log_data_quality(data_quality: dict[str, typing.Any]):
     logging.info(f'rows_with_na: {100 * rows_with_na}%')
 
 
+# Initialize data transformer
+data_transformer = DataTransformer(TIME_STAMP, na_method='median-mode', ctg_method='ohe')
+# Initialize ML model
+model = RandomForestClassifier()
+# Initialize parameters grid
+params = {'n_estimators': [1, 2, 4],
+          'max_depth': [4, 16, 64, 256],
+          }
+# Initialize ModelPipeline
+pipeline = ModelPipeline(data_transformer, model, params, PATH_TO_MODEL_PIPELINE_SAVES)
+
+
 def train(args: argparse.Namespace):
+    assert args.data
+    assert args.logs
+
     # Initialize logger
-    init_logger(args.log_dir)
+    init_logger(args.logs)
 
     # Initialize data provider
-    raw_data_path = args.dataset
+    raw_data_path = args.data
     data_provider = DataProvider(raw_data_path, TIME_STAMP, PATH_TO_DATA_PROVIDER_SAVES)
 
     # Initialize data analyzer
     data_analyzer = DataAnalyzer()
 
-    # Initialize data transformer
-    data_transformer = DataTransformer(na_method='median-mode', ctg_method='ohe')
-    # Initialize ML model
-    model = RandomForestClassifier()
-    # Initialize parameters grid
-    params = {'n_estimators': [1, 2, 4],
-              'max_depth': [4, 16, 64, 256],
-              }
-    # Initialize ModelPipeline
-    pipeline = ModelPipeline(data_transformer, model, params, PATH_TO_MODEL_PIPELINE_SAVES)
-
     if args.verbose:
-        print('Start')
+        print('Training starts')
+    print(f'Current position in data: {data_provider.i}')
     while True:
         # Receive data batch
         data = data_provider.get_batch()
@@ -119,7 +126,28 @@ def train(args: argparse.Namespace):
         # Emulate delay between data arrivals
         time.sleep(PAUSE)
     if args.verbose:
-        print('End')
+        print('Training ends')
+
+
+def inference(args: argparse.Namespace):
+    assert args.data
+    assert args.out
+
+    # Load data
+    x = pd.read_csv(args.data)
+
+    if args.verbose:
+        print('Inference starts')
+
+    # Predict
+    x, y = pipeline.predict(x)
+
+    if args.verbose:
+        print('Inference ends')
+
+    # Save predictions
+    xy = xy_to_data(x, y)
+    xy.to_csv(args.out)
 
 
 def main():
@@ -133,7 +161,7 @@ def main():
     elif args.mode == 'update':
         pass
     elif args.mode == 'inference':
-        pass
+        inference(args)
     elif args.mode == 'summary':
         pass
 

@@ -127,15 +127,15 @@ class DataTransformer:
         x, y = data_to_xy(data, y.columns)
         return x, y
 
-    def prepare_pred(self, x: pd.DataFrame, y: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
+    def prepare_pred(self, x: pd.DataFrame, y: pd.DataFrame = None) -> tuple[pd.DataFrame, pd.DataFrame]:
         """
         Process data to prepare it for making prediction
 
         :param x: features
-        :param y: target
+        :param y: target (optional)
         :return: processed (x, y)
         """
-        data = pd.concat((x, y), axis=1)
+        data = x if y is None else pd.concat((x, y), axis=1)
 
         # Process timestamps column
         data = self.__process_timestamps(data)
@@ -145,5 +145,5 @@ class DataTransformer:
         if self.ctg_method == 'ohe':
             data = self.__rm_unknown_ctg(data)
 
-        x, y = data_to_xy(data, y.columns)
+        x, y = (data, None) if y is None else data_to_xy(data, y.columns)
         return x, y

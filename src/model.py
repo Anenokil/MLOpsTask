@@ -26,12 +26,12 @@ class ModelPipeline:
 
     def __load_state(self):
         try:
-            self.selector = read(self.path_to_save)
+            self.selector, self.transformer = read(self.path_to_save)
         except FileNotFoundError:
             pass
 
     def __save_state(self):
-        save(self.path_to_save, self.selector)
+        save(self.path_to_save, [self.selector, self.transformer])
 
     def fit(self, new_x: pd.DataFrame, new_y: pd.DataFrame):
         self.data.add(new_x, new_y)
@@ -41,8 +41,10 @@ class ModelPipeline:
 
         self.__save_state()
 
-    def predict(self, x: pd.DataFrame) -> typing.Any:
-        return self.selector.predict(x)
+    def predict(self, x: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
+        x, _ = self.transformer.prepare_pred(x)
+        y = pd.DataFrame({'predicted': self.selector.predict(x)})
+        return x, y
 
     def eval(self, x: pd.DataFrame, y: pd.DataFrame) -> float:
         x, y = self.transformer.prepare_pred(x, y)

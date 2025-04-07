@@ -18,6 +18,17 @@ def data_to_xy(data: pd.DataFrame, target: str) -> tuple[pd.DataFrame, pd.DataFr
     return x, y
 
 
+def xy_to_data(x: pd.DataFrame, y: pd.DataFrame) -> pd.DataFrame:
+    """
+    Concatenate features and target
+
+    :param x: features
+    :param y: target
+    :return: concatenated data
+    """
+    return pd.concat((x, y), axis=1)
+
+
 def save(fn: str, data: typing.Any):
     """
     Save data to file
