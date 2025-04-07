@@ -15,6 +15,7 @@ from src.model import ModelPipeline
 TARGET = 'WITH_PAID'  # Target column in data
 TIME_STAMP = 'INSR_BEGIN'  # Column with time stamps
 PATH_TO_DATA_PROVIDER_SAVES = os.path.join('settings', 'dp.pkl')  # Path to file with DataProvider saved state
+PATH_TO_MODEL_PIPELINE_SAVES = os.path.join('settings', 'mp.pkl')  # Path to file with ModelPipeline saved state
 PAUSE = 3  # Pause (in seconds) between data arrivals
 
 
@@ -85,7 +86,7 @@ def main():
               'max_depth': [4, 16, 64, 256],
               }
     # Initialize ModelPipeline
-    pipeline = ModelPipeline(data_transformer, model, params)
+    pipeline = ModelPipeline(data_transformer, model, params, PATH_TO_MODEL_PIPELINE_SAVES)
 
     if args.verbose:
         print('Start')
