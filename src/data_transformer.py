@@ -6,10 +6,11 @@ from src.utils import data_to_xy
 
 
 class DataTransformer:
-    def __init__(self, na_method='drop', ctg_method='ohe'):
+    def __init__(self, timestamps: str, na_method='drop', ctg_method='ohe'):
         """
         DataTransformer processes data
 
+        :param timestamps: name of column with timestamps
         :param na_method: how to process missing values:
             'drop' for remove lines with missing values;
             'median-mode' for replace them with median (for numeric) or mode (for categorical)
@@ -19,16 +20,21 @@ class DataTransformer:
         assert na_method in ['drop', 'median-mode']
         assert ctg_method in ['ohe']
 
+        self.timestamps = timestamps
         self.na_method = na_method
         self.ctg_method = ctg_method
 
         self.ohe = None
         self.ohe_categories = None
 
+    def __process_timestamps(self, data: pd.DataFrame) -> pd.DataFrame:
+        data = data.drop(self.timestamps, axis=1)
+        return data
+
     def __process_na(self, data: pd.DataFrame) -> pd.DataFrame:
         """
         Process missing values
-        
+
         :param data: data
         :return: processed data
         """
@@ -89,6 +95,8 @@ class DataTransformer:
         rows_with_unknown.discard(-1)
         # Drop these rows
         data = data.drop(index=list(rows_with_unknown), axis=0)
+        if data.empty:
+            return data
         # Encode categorical features
         encoded_ctg = self.ohe.transform(data[categorical_cols])
         # Concatenate non-categorical and encoded categorical features
@@ -109,6 +117,8 @@ class DataTransformer:
         """
         data = pd.concat((x, y), axis=1)
 
+        # Process timestamps column
+        data = self.__process_timestamps(data)
         # Process missing values
         data = self.__process_na(data)
         # Process categorical features
@@ -127,6 +137,8 @@ class DataTransformer:
         """
         data = pd.concat((x, y), axis=1)
 
+        # Process timestamps column
+        data = self.__process_timestamps(data)
         # Process missing values
         data = self.__process_na(data)
         # Process categorical features
