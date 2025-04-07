@@ -8,7 +8,8 @@ from sklearn.tree import DecisionTreeClassifier
 
 from src.data_provider import DataProvider
 from src.data_collector import data_to_xy
-from src.EDA_and_preprocessing import DataAnalyzer, DataTransformer
+from src.data_analyzer import DataAnalyzer
+from src.data_transformer import DataTransformer
 from src.model import Model
 
 TARGET = 'WITH_PAID'  # Target column in data
