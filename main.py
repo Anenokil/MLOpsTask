@@ -12,6 +12,9 @@ from src.data_analyzer import DataAnalyzer
 from src.data_transformer import DataTransformer
 from src.model import ModelPipeline
 
+# import warnings
+# warnings.filterwarnings('ignore')
+
 TARGET = 'WITH_PAID'  # Target column in data
 TIME_STAMP = 'INSR_BEGIN'  # Column with time stamps
 PATH_TO_DATA_PROVIDER_SAVES = os.path.join('.states', 'dp.pkl')  # Path to file with DataProvider saved state
@@ -24,7 +27,8 @@ def get_args():
     parser.add_argument('-c', '--config', help='Path to YAML config')
     parser.add_argument('-d', '--dataset', help='Path to CSV file with dataset')
     parser.add_argument('-l', '--log_dir', help='Path to folder with logs')
-    parser.add_argument('-v', '--verbose', help='Increase output verbosity', action='store_true', required=False)
+    parser.add_argument('-m', '--mode', choices=['train', 'update', 'inference', 'summary'], help='Action type')
+    parser.add_argument('-v', '--verbose', help='Increase output verbosity', action='store_true')
     return parser.parse_args()
 
 
@@ -61,12 +65,7 @@ def log_data_quality(data_quality: dict[str, typing.Any]):
     logging.info(f'rows_with_na: {100 * rows_with_na}%')
 
 
-def main():
-    # Get args from console
-    args = get_args()
-    # Read args from config
-    read_config(args)
-
+def train(args: argparse.Namespace):
     # Initialize logger
     init_logger(args.log_dir)
 
@@ -81,7 +80,7 @@ def main():
     data_transformer = DataTransformer(na_method='median-mode', ctg_method='ohe')
     # Initialize ML model
     model = RandomForestClassifier()
-    # Initialize parameters for grid search
+    # Initialize parameters grid
     params = {'n_estimators': [1, 2, 4],
               'max_depth': [4, 16, 64, 256],
               }
@@ -121,6 +120,22 @@ def main():
         time.sleep(PAUSE)
     if args.verbose:
         print('End')
+
+
+def main():
+    # Get args from console
+    args = get_args()
+    # Read args from config
+    read_config(args)
+
+    if args.mode == 'train':
+        train(args)
+    elif args.mode == 'update':
+        pass
+    elif args.mode == 'inference':
+        pass
+    elif args.mode == 'summary':
+        pass
 
 
 main()
