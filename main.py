@@ -28,7 +28,7 @@ def get_args():
     parser.add_argument('-c', '--config', help='Path to YAML config')
     parser.add_argument('-d', '--data', help='Path to CSV file with dataset')
     parser.add_argument('-o', '--out', help='Output path for inference')
-    parser.add_argument('-l', '--logs', help='Path to folder with logs')
+    parser.add_argument('-l', '--logs', help='Path to folder with logs', default='.logs')
     parser.add_argument('-m', '--mode', choices=['train', 'update', 'inference', 'summary'], help='Action type')
     parser.add_argument('-v', '--verbose', help='Increase output verbosity', action='store_true')
     return parser.parse_args()
@@ -47,14 +47,20 @@ def read_config(args: argparse.Namespace):
 
 
 def init_logger(log_dir: str):
-    logs = []
-    for fn in os.listdir(log_dir):
-        name, ext = os.path.splitext(fn)
-        if ext != '.log':
-            continue
-        logs.append(int(name))
+    if os.path.exists(log_dir):
+        logs = []
+        for fn in os.listdir(log_dir):
+            name, ext = os.path.splitext(fn)
+            if ext != '.log':
+                continue
+            logs.append(int(name))
 
-    log_idx = 1 if not logs else max(logs) + 1
+        log_idx = 1 if not logs else max(logs) + 1
+    else:
+        os.mkdir(log_dir)
+
+        log_idx = 1
+
     log_fn = os.path.join(log_dir, f'{log_idx:05}.log')
 
     logging.basicConfig(filename=log_fn, level=logging.INFO, format='%(asctime)s - %(message)s')
