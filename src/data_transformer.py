@@ -57,22 +57,33 @@ class DataTransformer:
                                        dtype=int, index=noncategorical.index)
             self.data = pd.concat([noncategorical, encoded_ctg], axis=1)
 
-    def rm_unknown_ctg(self, data: pd.DataFrame) -> pd.DataFrame:
+    def __rm_unknown_ctg(self, data: pd.DataFrame) -> pd.DataFrame:
+        """
+        Remove rows containing unknown categorical values from the data
+
+        :param data: data
+        :return: processed data
+        """
+        # Get columns with categorical values
         categorical_cols = data.dtypes[data.dtypes == 'object'].index.tolist()
         categorical = data[categorical_cols]
+        # Search unknown categories in columns
         unknown = []
         for i in range(categorical.shape[1]):
             col_name = categorical_cols[i]
             col = data[col_name]
             unknown.append(col.apply(lambda val: val not in self.ohe_categories[i]))
         unknown = pd.concat(unknown, axis=1).any(axis=1)
+        # Get rows containing unknown categories
         rows_with_unknown = np.where(unknown, unknown.index, -1)
         rows_with_unknown = set(rows_with_unknown)
         if -1 in rows_with_unknown:
             rows_with_unknown.remove(-1)
+        # Drop these rows
         data = data.drop(index=list(rows_with_unknown), axis=0)
+        # Encode categorical features
         encoded_ctg = self.ohe.transform(data[categorical_cols])
-
+        # Concatenate non-categorical and encoded categorical features
         noncategorical = data.drop(categorical_cols, axis=1)
         encoded_ctg = pd.DataFrame(encoded_ctg.toarray(), columns=self.ohe.get_feature_names_out(),
                                    dtype=int, index=noncategorical.index)
@@ -110,7 +121,7 @@ class DataTransformer:
 
         # TODO: process na
         if self.ctg_method == 'ohe':
-            data = self.rm_unknown_ctg(data)
+            data = self.__rm_unknown_ctg(data)
 
         x, y = data_to_xy(data, y.columns)
         return x, y
