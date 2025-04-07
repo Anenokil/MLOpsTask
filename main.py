@@ -4,7 +4,7 @@ import time
 import argparse
 import logging
 import yaml
-from sklearn.tree import DecisionTreeClassifier
+from sklearn.ensemble import RandomForestClassifier
 
 from src.utils import data_to_xy
 from src.data_provider import DataProvider
@@ -79,9 +79,11 @@ def main():
     # Initialize data transformer
     data_transformer = DataTransformer(na_method='median-mode', ctg_method='ohe')
     # Initialize ML model
-    model = DecisionTreeClassifier()
+    model = RandomForestClassifier()
     # Initialize parameters for grid search
-    params = {'max_depth': [2, 4, 8, 16, 32, 64, 128, 256, 512, 1024]}
+    params = {'n_estimators': [1, 2, 4],
+              'max_depth': [4, 16, 64, 256],
+              }
     # Initialize ModelPipeline
     pipeline = ModelPipeline(data_transformer, model, params)
 
