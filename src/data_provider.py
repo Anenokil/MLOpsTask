@@ -1,17 +1,32 @@
 import pandas as pd
 
+from src.utils import read, save
+
 
 class DataProvider:
-    def __init__(self, path_to_raw_data: str, time_stamp: str):
+    def __init__(self, path_to_raw_data: str, time_stamp: str, path_to_settings: str):
         """
         DataProvider emulates a streaming data source
 
         :param path_to_raw_data: path to data (CSV-file)
         :param time_stamp: name of column with time stamps
+        :param path_to_settings: path to file with DataProvider state
         """
         self.data = pd.read_csv(path_to_raw_data)
         self.time_stamp = time_stamp
+        self.path_to_settings = path_to_settings
         self.i = 0
+
+        self.__read_settings()
+
+    def __read_settings(self):
+        try:
+            self.i = read(self.path_to_settings)
+        except FileNotFoundError:
+            self.i = 0
+
+    def __save_settings(self):
+        save(self.path_to_settings, self.i)
 
     def get_day_data(self) -> pd.DataFrame:
         """
@@ -22,6 +37,8 @@ class DataProvider:
         date = self.data.loc[self.i, self.time_stamp]
         day_data = self.data[self.data[self.time_stamp] == date]
         self.i += day_data.shape[0]
+
+        self.__save_settings()
 
         return day_data
 
@@ -36,5 +53,7 @@ class DataProvider:
         end = self.i + batch_size - 1
         batch = self.data.loc[start:end]
         self.i += batch_size
+
+        self.__save_settings()
 
         return batch
