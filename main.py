@@ -10,7 +10,7 @@ from src.utils import data_to_xy
 from src.data_provider import DataProvider
 from src.data_analyzer import DataAnalyzer
 from src.data_transformer import DataTransformer
-from src.model import Model
+from src.model import ModelPipeline
 
 TARGET = 'WITH_PAID'  # Target column in data
 TIME_STAMP = 'INSR_BEGIN'  # Column with time stamps
@@ -75,37 +75,38 @@ def main():
     data_analyzer = DataAnalyzer()
 
     # Initialize data transformer
-    data_processor = DataTransformer(na_method='median-mode', ctg_method='drop')
-
+    data_transformer = DataTransformer(na_method='median-mode', ctg_method='ohe')
     # Initialize ML model
-    model = Model(DecisionTreeClassifier())
+    model = DecisionTreeClassifier()
+    # Initialize ModelPipeline
+    pipeline = ModelPipeline(model, data_transformer)
 
     if args.verbose:
         print('Start')
     while True:
-        # Get data batch
+        # Receive data batch
         data = data_provider.get_batch()
         if data.empty:
             break
         if args.verbose:
             print('Receive new data')
         logging.info(f'Get {data.shape[0]} samples')
+
         # Analyze data
         stat = data_analyzer.analyze(data)
         log_data_quality(stat['na'])
-        # Preprocess data
-        processed_data = data_processor.process(data)
-        logging.info(f'Keep {processed_data.shape[0]} samples')
-        x, y = data_to_xy(processed_data, TARGET)
+
+        x, y = data_to_xy(data, TARGET)
         # Evaluate model
-        if model.is_fit():
+        if pipeline.is_fit():
             if args.verbose:
                 print('Evaluate model')
-            print(model.eval(x, y))
+            print(pipeline.eval(x, y))
         # Train model
         if args.verbose:
             print('Train model')
-        model.fit(x, y)
+        pipeline.fit(x, y)
+
         # Emulate delay between data arrivals
         time.sleep(3)
     if args.verbose:
