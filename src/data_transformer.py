@@ -28,6 +28,9 @@ class DataTransformer:
     def __process_na(self, data: pd.DataFrame) -> pd.DataFrame:
         """
         Process missing values
+        
+        :param data: data
+        :return: processed data
         """
         if self.na_method == 'drop':
             data = data.dropna()
@@ -44,6 +47,9 @@ class DataTransformer:
     def __process_ctg(self, data: pd.DataFrame) -> pd.DataFrame:
         """
         Process categorical features
+
+        :param data: data
+        :return: processed data
         """
         if self.ctg_method == 'ohe':
             # Encode categorical features
