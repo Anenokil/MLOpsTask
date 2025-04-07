@@ -6,8 +6,8 @@ import logging
 import yaml
 from sklearn.tree import DecisionTreeClassifier
 
+from src.utils import data_to_xy
 from src.data_provider import DataProvider
-from src.data_collector import data_to_xy
 from src.data_analyzer import DataAnalyzer
 from src.data_transformer import DataTransformer
 from src.model import Model

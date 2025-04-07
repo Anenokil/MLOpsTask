@@ -33,9 +33,3 @@ class DataCollector:
         :return: data (x, y)
         """
         return self.x, self.y
-
-
-def data_to_xy(data: pd.DataFrame, target: str) -> tuple[pd.DataFrame, pd.DataFrame]:
-    x = data.drop(target, axis=1)
-    y = data[target]
-    return x, y
