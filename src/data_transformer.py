@@ -1,5 +1,8 @@
+import numpy as np
 import pandas as pd
 from sklearn.preprocessing import OneHotEncoder
+
+from src.utils import data_to_xy
 
 
 class DataTransformer:
@@ -11,16 +14,17 @@ class DataTransformer:
             'drop' for remove lines with missing values;
             'median-mode' for replace them with median (for numeric) or mode (for categorical)
         :param ctg_method: how to process categorical features:
-            'drop' for remove categorical columns;
             'ohe' for one-hot encoding
         """
         assert na_method in ['drop', 'median-mode']
-        assert ctg_method in ['drop', 'ohe']
+        assert ctg_method in ['ohe']
 
         self.na_method = na_method
         self.ctg_method = ctg_method
 
         self.data = None
+        self.ohe = None
+        self.ohe_categories = None
 
     def __process_na(self):
         """
@@ -40,31 +44,33 @@ class DataTransformer:
         """
         Process categorical features
         """
-        categorical_cols = self.data.dtypes[self.data.dtypes == 'object'].index.tolist()
-        if self.ctg_method == 'drop':
-            self.data = self.data.drop(columns=categorical_cols)
-        elif self.ctg_method == 'ohe':  # TODO
-            # Update categories list
-            ohe = OneHotEncoder()
-            encoded_ctg = ohe.fit_transform(self.data[categorical_cols])
+        if self.ctg_method == 'ohe':
+            # Encode categorical features
+            categorical_cols = self.data.dtypes[self.data.dtypes == 'object'].index.tolist()
+            self.ohe = OneHotEncoder()
+            encoded_ctg = self.ohe.fit_transform(self.data[categorical_cols])
+            # Save categories
+            self.ohe_categories = self.ohe.categories_
             # Concatenate non-categorical and encoded categorical features
             noncategorical = self.data.drop(categorical_cols, axis=1)
-            encoded_ctg = pd.DataFrame(encoded_ctg.toarray(), columns=ohe.get_feature_names_out(),
+            encoded_ctg = pd.DataFrame(encoded_ctg.toarray(), columns=self.ohe.get_feature_names_out(),
                                        dtype=int, index=noncategorical.index)
             self.data = pd.concat([noncategorical, encoded_ctg], axis=1)
 
-    def process(self, df: pd.DataFrame) -> pd.DataFrame:
+    def prepare_train(self, x: pd.DataFrame, y: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
         """
-        Process data
+        Process data to prepare it for training
 
-        :param df: data
-        :return: processed data
+        :param x: features
+        :param y: target
+        :return: processed (x, y)
         """
-        self.data = df.copy()
+        self.data = pd.concat((x, y), axis=1)
 
         # Process missing values
         self.__process_na()
         # Process categorical features
         self.__process_ctg()
 
-        return self.data
+        x, y = data_to_xy(self.data, y.columns)
+        return x, y
