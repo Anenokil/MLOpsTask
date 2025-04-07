@@ -4,29 +4,29 @@ from src.utils import read, save
 
 
 class DataProvider:
-    def __init__(self, path_to_raw_data: str, time_stamp: str, path_to_settings: str):
+    def __init__(self, path_to_raw_data: str, time_stamp: str, path_to_save: str):
         """
         DataProvider emulates a streaming data source
 
         :param path_to_raw_data: path to data (CSV-file)
         :param time_stamp: name of column with time stamps
-        :param path_to_settings: path to file with DataProvider state
+        :param path_to_save: path to file with DataProvider state
         """
         self.data = pd.read_csv(path_to_raw_data)
         self.time_stamp = time_stamp
-        self.path_to_settings = path_to_settings
+        self.path_to_save = path_to_save
         self.i = 0
 
-        self.__read_settings()
+        self.__load_state()
 
-    def __read_settings(self):
+    def __load_state(self):
         try:
-            self.i = read(self.path_to_settings)
+            self.i = read(self.path_to_save)
         except FileNotFoundError:
-            self.i = 0
+            pass
 
-    def __save_settings(self):
-        save(self.path_to_settings, self.i)
+    def __save_state(self):
+        save(self.path_to_save, self.i)
 
     def get_day_data(self) -> pd.DataFrame:
         """
@@ -38,7 +38,7 @@ class DataProvider:
         day_data = self.data[self.data[self.time_stamp] == date]
         self.i += day_data.shape[0]
 
-        self.__save_settings()
+        self.__save_state()
 
         return day_data
 
@@ -54,6 +54,6 @@ class DataProvider:
         batch = self.data.loc[start:end]
         self.i += batch_size
 
-        self.__save_settings()
+        self.__save_state()
 
         return batch

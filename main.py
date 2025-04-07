@@ -14,7 +14,7 @@ from src.model import ModelPipeline
 
 TARGET = 'WITH_PAID'  # Target column in data
 TIME_STAMP = 'INSR_BEGIN'  # Column with time stamps
-PATH_TO_DATA_PROVIDER_SETTINGS = os.path.join('settings', 'dp.pkl')  # Path to DataProvider settings file
+PATH_TO_DATA_PROVIDER_SAVES = os.path.join('settings', 'dp.pkl')  # Path to file with DataProvider saved state
 PAUSE = 3  # Pause (in seconds) between data arrivals
 
 
@@ -71,7 +71,7 @@ def main():
 
     # Initialize data provider
     raw_data_path = args.dataset
-    data_provider = DataProvider(raw_data_path, TIME_STAMP, PATH_TO_DATA_PROVIDER_SETTINGS)
+    data_provider = DataProvider(raw_data_path, TIME_STAMP, PATH_TO_DATA_PROVIDER_SAVES)
 
     # Initialize data analyzer
     data_analyzer = DataAnalyzer()
