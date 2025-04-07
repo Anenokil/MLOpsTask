@@ -80,8 +80,10 @@ def main():
     data_transformer = DataTransformer(na_method='median-mode', ctg_method='ohe')
     # Initialize ML model
     model = DecisionTreeClassifier()
+    # Initialize parameters for grid search
+    params = {'max_depth': [2, 4, 8, 16, 32, 64, 128, 256, 512, 1024]}
     # Initialize ModelPipeline
-    pipeline = ModelPipeline(model, data_transformer)
+    pipeline = ModelPipeline(data_transformer, model, params)
 
     if args.verbose:
         print('Start')
