@@ -197,6 +197,7 @@ def evaluate(args: argparse.Namespace):
     if args.verbose:
         print('Evaluation starts')
     print(f'Current position in data: {data_provider.i}')
+    scores = []
     i = 0
     while True:
         # Receive data batch
@@ -218,6 +219,7 @@ def evaluate(args: argparse.Namespace):
             if args.verbose:
                 print('Evaluate model')
             score = pipeline.eval(x, y)
+            scores.append(score)
             print(f'Score: {score}')
             logging.info(f'Score: {score}')
 
@@ -226,6 +228,7 @@ def evaluate(args: argparse.Namespace):
         i += 1
         if i == args.n_iter:
             break
+    print(f'Mean score: {sum(scores) / len(scores)}')
     if args.verbose:
         print('Evaluation ends')
 
