@@ -18,7 +18,7 @@ Project structure
      ├── main.py            # Entry point of the application
      ├── Pipfile            # Pipenv configuration
      ├── requirements.txt   # Project dependencies
-     └── README.md          # Project documentation
+     └── README.rst         # Project documentation
 
 ..
 
