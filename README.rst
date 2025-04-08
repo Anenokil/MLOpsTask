@@ -26,12 +26,12 @@ Usage
 -----
 Train: ::
 
-    python3 main.py --mode train -data <path_to_dataset> --n_iter <int> [--verbose]
+    python3 main.py --mode train --data <path_to_dataset> [--n_iter <int>] [--verbose]
 
 ..
 
 Inference: ::
 
-    python3 main.py --mode inference -data <path_to_dataset> -o <path_to_output_file> [--verbose]
+    python3 main.py --mode inference --data <path_to_dataset> --out <path_to_output_file> [--verbose]
 
 ..
