@@ -26,12 +26,12 @@ class ModelPipeline:
 
     def __load_state(self):
         try:
-            self.selector, self.transformer = read(self.path_to_save)
+            self.data, self.transformer, self.selector = read(self.path_to_save)
         except FileNotFoundError:
             pass
 
     def __save_state(self):
-        save(self.path_to_save, [self.selector, self.transformer])
+        save(self.path_to_save, [self.data, self.transformer, self.selector])
 
     def fit(self, new_x: pd.DataFrame, new_y: pd.DataFrame):
         self.data.add(new_x, new_y)
