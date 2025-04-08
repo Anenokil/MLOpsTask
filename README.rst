@@ -36,6 +36,12 @@ Update the best model: ::
 
 ..
 
+Evaluate model: ::
+
+    pythonn3 main.py --mode eval --data <path_to_dataset> [--n_iter <int>] [--verbose]
+
+..
+
 Inference: ::
 
     python3 main.py --mode inference --data <path_to_dataset> --out <path_to_output_file> [--verbose]

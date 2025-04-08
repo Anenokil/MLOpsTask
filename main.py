@@ -29,7 +29,7 @@ def get_args():
     parser.add_argument('-d', '--data', help='Path to CSV file with dataset')
     parser.add_argument('-o', '--out', help='Output path for inference')
     parser.add_argument('-l', '--logs', help='Path to folder with logs', default='.logs')
-    parser.add_argument('-m', '--mode', choices=['train', 'update', 'inference', 'summary'], help='Action type')
+    parser.add_argument('-m', '--mode', choices=['train', 'update', 'eval', 'inference', 'summary'], help='Action type')
     parser.add_argument('-n', '--n_iter', help='Number of training iterations. Set 0 to train on all data',
                         type=int, default=0)
     parser.add_argument('-v', '--verbose', help='Increase output verbosity', action='store_true')
@@ -179,6 +179,57 @@ def update(args: argparse.Namespace):
         pipeline.refit(x, y)
 
 
+def evaluate(args: argparse.Namespace):
+    assert args.data is not None
+    assert args.logs is not None
+    assert args.n_iter is not None
+
+    # Initialize logger
+    init_logger(args.logs)
+
+    # Initialize data provider
+    raw_data_path = args.data
+    data_provider = DataProvider(raw_data_path, TIMESTAMPS, PATH_TO_DATA_PROVIDER_SAVES)
+
+    # Initialize data analyzer
+    data_analyzer = DataAnalyzer()
+
+    if args.verbose:
+        print('Evaluation starts')
+    print(f'Current position in data: {data_provider.i}')
+    i = 0
+    while True:
+        # Receive data batch
+        data = data_provider.get_batch()
+        if data.empty:
+            break
+        if args.verbose:
+            print('Receive new data')
+        logging.info(f'Get {data.shape[0]} samples')
+
+        # Analyze data
+        stat = data_analyzer.analyze(data)
+        log_data_quality(stat['na'])
+
+        x, y = data_to_xy(data, TARGET)
+        # Evaluate model
+        if pipeline.is_fit():
+            logging.info('Evaluate model')
+            if args.verbose:
+                print('Evaluate model')
+            score = pipeline.eval(x, y)
+            print(f'Score: {score}')
+            logging.info(f'Score: {score}')
+
+        # Emulate delay between data arrivals
+        time.sleep(PAUSE)
+        i += 1
+        if i == args.n_iter:
+            break
+    if args.verbose:
+        print('Evaluation ends')
+
+
 def inference(args: argparse.Namespace):
     assert args.data is not None
     assert args.out is not None
@@ -210,6 +261,8 @@ def main():
         train(args)
     elif args.mode == 'update':
         update(args)
+    elif args.mode == 'eval':
+        evaluate(args)
     elif args.mode == 'inference':
         inference(args)
     elif args.mode == 'summary':
