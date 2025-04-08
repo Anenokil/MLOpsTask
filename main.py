@@ -142,6 +142,43 @@ def train(args: argparse.Namespace):
         print('Training ends')
 
 
+def update(args: argparse.Namespace):
+    assert args.data is not None
+    assert args.logs is not None
+
+    # Initialize logger
+    init_logger(args.logs)
+
+    # Initialize data provider
+    raw_data_path = args.data
+    data_provider = DataProvider(raw_data_path, TIMESTAMPS, PATH_TO_DATA_PROVIDER_SAVES)
+
+    # Initialize data analyzer
+    data_analyzer = DataAnalyzer()
+
+    if not pipeline.is_fit():
+        print('Model is not fitted')
+        return
+
+    print(f'Current position in data: {data_provider.i}')
+    # Receive data batch
+    data = data_provider.get_batch()
+    if not data.empty:
+        if args.verbose:
+            print('Receive new data')
+        logging.info(f'Get {data.shape[0]} samples')
+
+        # Analyze data
+        stat = data_analyzer.analyze(data)
+        log_data_quality(stat['na'])
+
+        x, y = data_to_xy(data, TARGET)
+        # Train model
+        if args.verbose:
+            print('Train model')
+        pipeline.refit(x, y)
+
+
 def inference(args: argparse.Namespace):
     assert args.data is not None
     assert args.out is not None
@@ -172,11 +209,13 @@ def main():
     if args.mode == 'train':
         train(args)
     elif args.mode == 'update':
-        pass
+        update(args)
     elif args.mode == 'inference':
         inference(args)
     elif args.mode == 'summary':
         pass
+    else:
+        print('No mode is specified')
 
 
 main()

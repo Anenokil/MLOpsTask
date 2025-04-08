@@ -19,6 +19,7 @@ class ModelPipeline:
         """
         self.data = DataCollector()
         self.transformer = transformer
+        self.model = None  # Best model selected by self.selector
         self.selector = GridSearchCV(model, param_grid)
         self.path_to_save = path_to_save
 
@@ -26,29 +27,34 @@ class ModelPipeline:
 
     def __load_state(self):
         try:
-            self.data, self.transformer, self.selector = read(self.path_to_save)
+            self.data, self.transformer, self.model, self.selector = read(self.path_to_save)
         except FileNotFoundError:
             pass
 
     def __save_state(self):
-        save(self.path_to_save, [self.data, self.transformer, self.selector])
+        save(self.path_to_save, [self.data, self.transformer, self.model, self.selector])
 
     def fit(self, new_x: pd.DataFrame, new_y: pd.DataFrame):
         self.data.add(new_x, new_y)
         x, y = self.data.get()
         x, y = self.transformer.prepare_train(x, y)
         self.selector.fit(x, y)
+        self.model = self.selector.best_estimator_
 
         self.__save_state()
 
+    def refit(self, x: pd.DataFrame, y: pd.DataFrame):
+        x, y = self.transformer.prepare_train(x, y)
+        self.model.fit(x, y)
+
     def predict(self, x: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
         x, _ = self.transformer.prepare_pred(x)
-        y = pd.DataFrame({'predicted': self.selector.predict(x)})
+        y = pd.DataFrame({'predicted': self.model.predict(x)})
         return x, y
 
     def eval(self, x: pd.DataFrame, y: pd.DataFrame) -> float:
         x, y = self.transformer.prepare_pred(x, y)
-        return self.selector.score(x, y)
+        return self.model.score(x, y)
 
     def is_fit(self) -> bool:
-        return self.data.x is not None
+        return self.model is not None

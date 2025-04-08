@@ -24,9 +24,15 @@ Project structure
 
 Usage
 -----
-Train: ::
+Train models and select the best: ::
 
     python3 main.py --mode train --data <path_to_dataset> [--n_iter <int>] [--verbose]
+
+..
+
+Update the best model: ::
+
+    python3 main.py --mode update --data <path_to_dataset> [--verbose]
 
 ..
 
