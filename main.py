@@ -22,6 +22,9 @@ PATH_TO_DATA_PROVIDER_SAVES = os.path.join('.states', 'dp.pkl')  # Path to file 
 PATH_TO_MODEL_PIPELINE_SAVES = os.path.join('.states', 'mp.pkl')  # Path to file with ModelPipeline saved state
 PAUSE = 3  # Pause (in seconds) between data arrivals
 
+if not os.path.exists('.states'):
+    os.mkdir('.states')
+
 
 def get_args():
     parser = argparse.ArgumentParser()
