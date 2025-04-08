@@ -30,6 +30,8 @@ def get_args():
     parser.add_argument('-o', '--out', help='Output path for inference')
     parser.add_argument('-l', '--logs', help='Path to folder with logs', default='.logs')
     parser.add_argument('-m', '--mode', choices=['train', 'update', 'inference', 'summary'], help='Action type')
+    parser.add_argument('-n', '--n_iter', help='Number of training iterations. Set 0 to train on all data',
+                        type=int, default=0)
     parser.add_argument('-v', '--verbose', help='Increase output verbosity', action='store_true')
     return parser.parse_args()
 
@@ -86,8 +88,9 @@ pipeline = ModelPipeline(data_transformer, model, params, PATH_TO_MODEL_PIPELINE
 
 
 def train(args: argparse.Namespace):
-    assert args.data
-    assert args.logs
+    assert args.data is not None
+    assert args.logs is not None
+    assert args.n_iter is not None
 
     # Initialize logger
     init_logger(args.logs)
@@ -102,6 +105,7 @@ def train(args: argparse.Namespace):
     if args.verbose:
         print('Training starts')
     print(f'Current position in data: {data_provider.i}')
+    i = 0
     while True:
         # Receive data batch
         data = data_provider.get_batch()
@@ -131,13 +135,16 @@ def train(args: argparse.Namespace):
 
         # Emulate delay between data arrivals
         time.sleep(PAUSE)
+        i += 1
+        if i == args.n_iter:
+            break
     if args.verbose:
         print('Training ends')
 
 
 def inference(args: argparse.Namespace):
-    assert args.data
-    assert args.out
+    assert args.data is not None
+    assert args.out is not None
 
     # Load data
     x = pd.read_csv(args.data)

@@ -26,7 +26,7 @@ Usage
 -----
 Train: ::
 
-    python3 main.py --mode train -data <path_to_dataset> [--verbose]
+    python3 main.py --mode train -data <path_to_dataset> --n_iter <int> [--verbose]
 
 ..
 
