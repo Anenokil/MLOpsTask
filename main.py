@@ -4,8 +4,10 @@ import time
 import argparse
 import logging
 import yaml
+import numpy as np
 import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
+from scipy.spatial.distance import cosine
 
 from src.utils import data_to_xy, xy_to_data
 from src.data_provider import DataProvider
@@ -109,6 +111,7 @@ def train(args: argparse.Namespace):
         print('Training starts')
     print(f'Current position in data: {data_provider.i}')
     i = 0
+    etalon_stat = None
     while True:
         # Receive data batch
         data = data_provider.get_batch()
@@ -121,6 +124,16 @@ def train(args: argparse.Namespace):
         # Analyze data
         stat = data_analyzer.analyze(data)
         log_data_quality(stat['na'])
+        if etalon_stat is not None:
+            a = np.array(stat['num_means'])
+            b = np.array(etalon_stat['num_means'])
+            #cos = a @ b / (a ** 2).sum() ** 0.5 / (b ** 2).sum() ** 0.5
+            cos_dist = cosine(a, b)
+            if cos_dist > 0.2:
+                print('Data drift detected')
+                etalon_stat = stat
+        else:
+            etalon_stat = stat
 
         x, y = data_to_xy(data, TARGET)
         # Evaluate model
@@ -136,11 +149,12 @@ def train(args: argparse.Namespace):
             print('Train model')
         pipeline.fit(x, y)
 
-        # Emulate delay between data arrivals
-        time.sleep(PAUSE)
         i += 1
         if i == args.n_iter:
             break
+
+        # Emulate delay between data arrivals
+        time.sleep(PAUSE)
     if args.verbose:
         print('Training ends')
 
