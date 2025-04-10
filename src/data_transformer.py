@@ -43,7 +43,7 @@ class DataTransformer:
         elif self.na_method == 'median-mode':
             categorical_cols = data.dtypes[data.dtypes == 'object'].index.tolist()
             noncategorical_cols = data.dtypes[data.dtypes != 'object'].index.tolist()
-            modes = data[categorical_cols].mode().to_numpy()[0].tolist()
+            modes = data[categorical_cols].mode(axis=0).to_numpy()[0].tolist()
             medians = data[noncategorical_cols].median().tolist()
             placeholders = dict(zip(categorical_cols + noncategorical_cols, modes + medians))
             data = data.fillna(value=placeholders)
