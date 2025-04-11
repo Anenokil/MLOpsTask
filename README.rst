@@ -12,7 +12,7 @@ Project structure
      │   ├── data_analyzer.py      # Analyzes data
      │   ├── data_collector.py     # Stores data
      │   ├── data_provider.py      # Emulates data stream
-     │   ├── data_transformer.py   # Prepare data for model
+     │   ├── data_transformer.py   # Prepares data for model
      │   ├── model.py              # Manages the training process
      │   └── utils.py              # Auxiliary functions
      ├── main.py            # Entry point of the application
