@@ -24,7 +24,7 @@ MLOps Project
 
 Использование
 -------------
-Пример использования: ::
+Полный цикл обучения и применения модели: ::
 
     # Обучение и выбор наилучшей модели
     python3 main.py --mode train --data <path_to_dataset> [--n_iter <int>] [--verbose]
@@ -36,3 +36,11 @@ MLOps Project
     python3 main.py --mode inference --data <path_to_dataset> --out <path_to_output_file> [--verbose]
 
 ..
+
+CI/CD
+-----
+В проекте написан workflow train.yaml, который запускается при push/pull request.
+Шаги:
+- Установка зависимостей;
+- Обучение модели;
+- Сохранение логов.

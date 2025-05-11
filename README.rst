@@ -36,3 +36,11 @@ Usage example: ::
     python3 main.py --mode inference --data <path_to_dataset> --out <path_to_output_file> [--verbose]
 
 ..
+
+CI/CD
+-----
+There is train.yaml workflow, which is triggered by push/pull request.
+Steps:
+- Install requirements;
+- Train model;
+- Save logs.
