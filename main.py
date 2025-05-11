@@ -15,8 +15,8 @@ from src.data_analyzer import DataAnalyzer
 from src.data_transformer import DataTransformer
 from src.model import ModelPipeline
 
-# import warnings
-# warnings.filterwarnings('ignore')
+import warnings
+warnings.filterwarnings('ignore')
 
 TARGET = 'WITH_PAID'  # Target column in data
 TIMESTAMPS = 'INSR_BEGIN'  # Column with timestamps
@@ -33,7 +33,7 @@ def get_args():
     parser.add_argument('-c', '--config', help='Path to YAML config')
     parser.add_argument('-d', '--data', help='Path to CSV file with dataset')
     parser.add_argument('-o', '--out', help='Output path for inference')
-    parser.add_argument('-l', '--logs', help='Path to folder with logs', default='.logs')
+    #parser.add_argument('-l', '--logs', help='Path to folder with logs', default='.logs')
     parser.add_argument('-m', '--mode', choices=['train', 'update', 'eval', 'inference', 'summary'], help='Action type')
     parser.add_argument('-n', '--n_iter', help='Number of training iterations. Set 0 to train on all data',
                         type=int, default=0)
@@ -53,6 +53,7 @@ def read_config(args: argparse.Namespace):
             args.__dict__[k] = v
 
 
+"""
 def init_logger(log_dir: str):
     if os.path.exists(log_dir):
         logs = []
@@ -67,10 +68,14 @@ def init_logger(log_dir: str):
         os.mkdir(log_dir)
 
         log_idx = 1
-
     log_fn = os.path.join(log_dir, f'{log_idx:05}.log')
 
     logging.basicConfig(filename=log_fn, level=logging.INFO, format='%(asctime)s - %(message)s')
+"""
+
+
+def init_logger():
+    logging.basicConfig(filename='training.log', level=logging.INFO, format='%(asctime)s - %(message)s')
 
 
 def log_data_quality(data_quality: dict[str, typing.Any]):
@@ -94,11 +99,12 @@ pipeline = ModelPipeline(data_transformer, model, params, PATH_TO_MODEL_PIPELINE
 
 def train(args: argparse.Namespace):
     assert args.data is not None
-    assert args.logs is not None
+    #assert args.logs is not None
     assert args.n_iter is not None
 
     # Initialize logger
-    init_logger(args.logs)
+    #init_logger(args.logs)
+    init_logger()
 
     # Initialize data provider
     raw_data_path = args.data
@@ -161,10 +167,11 @@ def train(args: argparse.Namespace):
 
 def update(args: argparse.Namespace):
     assert args.data is not None
-    assert args.logs is not None
+    #assert args.logs is not None
 
     # Initialize logger
-    init_logger(args.logs)
+    #init_logger(args.logs)
+    init_logger()
 
     # Initialize data provider
     raw_data_path = args.data
@@ -198,11 +205,12 @@ def update(args: argparse.Namespace):
 
 def evaluate(args: argparse.Namespace):
     assert args.data is not None
-    assert args.logs is not None
+    #assert args.logs is not None
     assert args.n_iter is not None
 
     # Initialize logger
-    init_logger(args.logs)
+    #init_logger(args.logs)
+    init_logger()
 
     # Initialize data provider
     raw_data_path = args.data
