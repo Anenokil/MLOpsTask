@@ -40,6 +40,7 @@ Usage example: ::
 CI/CD
 -----
 There is train.yaml workflow, which is triggered by push/pull request.
+
 Steps:
 
 - Install requirements;

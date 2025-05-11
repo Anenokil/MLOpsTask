@@ -40,6 +40,7 @@ MLOps Project
 CI/CD
 -----
 В проекте написан workflow train.yaml, который запускается при push/pull request.
+
 Шаги:
 
 - Установка зависимостей;
