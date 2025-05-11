@@ -41,6 +41,7 @@ CI/CD
 -----
 There is train.yaml workflow, which is triggered by push/pull request.
 Steps:
+
 - Install requirements;
 - Train model;
 - Save logs.
