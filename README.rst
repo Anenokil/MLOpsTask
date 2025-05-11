@@ -24,26 +24,15 @@ Project structure
 
 Usage
 -----
-Train models and select the best: ::
+Usage example: ::
 
+    # Training
     python3 main.py --mode train --data <path_to_dataset> [--n_iter <int>] [--verbose]
 
-..
-
-Update the best model: ::
-
-    python3 main.py --mode update --data <path_to_dataset> [--verbose]
-
-..
-
-Evaluate model: ::
-
+    # Evaluation
     pythonn3 main.py --mode eval --data <path_to_dataset> [--n_iter <int>] [--verbose]
 
-..
-
-Inference: ::
-
+    # Inference
     python3 main.py --mode inference --data <path_to_dataset> --out <path_to_output_file> [--verbose]
 
 ..

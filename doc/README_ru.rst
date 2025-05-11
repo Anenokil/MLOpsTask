@@ -24,26 +24,15 @@ MLOps Project
 
 Использование
 -------------
-Обучение и выбор наилучшей модели: ::
+Пример использования: ::
 
+    # Обучение и выбор наилучшей модели
     python3 main.py --mode train --data <path_to_dataset> [--n_iter <int>] [--verbose]
 
-..
-
-Обучение модели на новых данных: ::
-
-    python3 main.py --mode update --data <path_to_dataset> [--verbose]
-
-..
-
-Оценка качества модели: ::
-
+    # Оценка качества модели
     pythonn3 main.py --mode eval --data <path_to_dataset> [--n_iter <int>] [--verbose]
 
-..
-
-Применение модели: ::
-
+    # Применение модели
     python3 main.py --mode inference --data <path_to_dataset> --out <path_to_output_file> [--verbose]
 
 ..
