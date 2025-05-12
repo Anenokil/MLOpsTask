@@ -1,6 +1,8 @@
 import typing
 import pandas as pd
 from sklearn.model_selection import GridSearchCV
+from matplotlib import pyplot as plt
+from sklearn import tree
 
 from src.utils import read, save
 from src.data_collector import DataCollector
@@ -42,6 +44,15 @@ class ModelPipeline:
         self.model = self.selector.best_estimator_
 
         self.__save_state()
+
+        fig, axes = plt.subplots(nrows=1, ncols=self.model.n_estimators, figsize=(10, 2), dpi=900)
+        for index in range(0, self.model.n_estimators):
+            tree.plot_tree(self.model.estimators_[index],
+                           filled=True,
+                           ax=axes[index])
+
+            axes[index].set_title('Estimator: ' + str(index), fontsize=11)
+        fig.savefig('best_model.png')
 
     def refit(self, x: pd.DataFrame, y: pd.DataFrame):
         x, y = self.transformer.prepare_train(x, y)
