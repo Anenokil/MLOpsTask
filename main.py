@@ -6,6 +6,8 @@ import logging
 import yaml
 import numpy as np
 import pandas as pd
+from datetime import datetime
+from memory_profiler import profile
 from sklearn.ensemble import RandomForestClassifier
 from scipy.spatial.distance import cosine
 
@@ -97,6 +99,7 @@ params = {'n_estimators': [1, 2, 4],
 pipeline = ModelPipeline(data_transformer, model, params, PATH_TO_MODEL_PIPELINE_SAVES)
 
 
+@profile
 def train(args: argparse.Namespace):
     assert args.data is not None
     #assert args.logs is not None
@@ -116,6 +119,7 @@ def train(args: argparse.Namespace):
     if args.verbose:
         print('Training starts')
     print(f'Current position in data: {data_provider.i}')
+    time_start = datetime.now()
     i = 0
     etalon_stat = None
     while True:
@@ -161,10 +165,14 @@ def train(args: argparse.Namespace):
 
         # Emulate delay between data arrivals
         time.sleep(PAUSE)
+    time_end = datetime.now()
+    print(f'Training time: {time_end - time_start}')
+    logging.info(f'Training time: {time_end - time_start}')
     if args.verbose:
         print('Training ends')
 
 
+@profile
 def update(args: argparse.Namespace):
     assert args.data is not None
     #assert args.logs is not None
@@ -203,6 +211,7 @@ def update(args: argparse.Namespace):
         pipeline.refit(x, y)
 
 
+@profile
 def evaluate(args: argparse.Namespace):
     assert args.data is not None
     #assert args.logs is not None
@@ -258,6 +267,7 @@ def evaluate(args: argparse.Namespace):
         print('Evaluation ends')
 
 
+@profile
 def inference(args: argparse.Namespace):
     assert args.data is not None
     assert args.out is not None
