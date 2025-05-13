@@ -8,6 +8,7 @@ pyyaml = "*"
 pandas = "*"
 scikit-learn = "*"
 memory-profiler = "*"
+matplotlib = "*"
 
 [dev-packages]
 
